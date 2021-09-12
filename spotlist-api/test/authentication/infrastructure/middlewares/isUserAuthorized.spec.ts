@@ -1,0 +1,80 @@
+import { Request, Response } from 'express';
+import loginUseCase, {
+  LoginUseCase
+} from '../../../../src/authentication/application/LoginUseCase';
+import isUserAuthorized from '../../../../src/authentication/infrastructure/middlewares/isUserAuthorized';
+import UnauthorizedError from '../../../../src/shared/infrastructure/errors/UnauthorizedError';
+
+jest.mock('../../../../src/authentication/application/LoginUseCase.ts');
+
+describe('isUserAuthorized', () => {
+  test('Should allow pass the request when user is authorized', async () => {
+    const headers = {
+      authorization: 'Basic SmhvbiBTbWl0aDp1bnNlY3VyZWRwYXNzd29yZDEyMzQ='
+    };
+    const { callMiddleware, mocks, services } = factory(headers);
+
+    services.loginUseCase.execute.mockResolvedValueOnce({
+      name: 'toni',
+      password: '123456',
+      id: '1'
+    });
+    await callMiddleware();
+
+    expect(mocks.next).toHaveBeenCalled();
+  });
+
+  test('Should set an unauthorized error when authorization header is not found', async () => {
+    const headers = {};
+    const { callMiddleware, mocks, services } = factory(headers);
+
+    await callMiddleware();
+
+    expect(mocks.next).toHaveBeenCalledWith(
+      new UnauthorizedError('User is not the one authenticated')
+    );
+  });
+
+  test('Should set an unauthorized error when authorization header is mal formed', async () => {
+    const headers = {
+      authorization: 'Bearer ..'
+    };
+    const { callMiddleware, mocks, services } = factory(headers);
+
+    await callMiddleware();
+
+    expect(mocks.next).toHaveBeenCalledWith(
+      new UnauthorizedError('User is not the one authenticated')
+    );
+  });
+
+  test('Should set an unauthorized error when authorization credentials are not correct', async () => {
+    const headers = {
+      authorization: 'Basic dG9uaTpydWl6'
+    };
+    const { callMiddleware, mocks, services } = factory(headers);
+
+    services.loginUseCase.execute.mockRejectedValue(new Error('User not found'));
+    await callMiddleware();
+
+    expect(mocks.next).toHaveBeenCalledWith(new UnauthorizedError('User not found'));
+  });
+});
+
+const factory = (customHeaders: { authorization?: string }) => {
+  const nextFnMock = jest.fn();
+  const requestMock = {
+    headers: customHeaders
+  } as unknown as Request;
+  const responseMock = jest.fn() as unknown as Response;
+
+  return {
+    callMiddleware: () => isUserAuthorized(requestMock, responseMock, nextFnMock),
+    services: {
+      loginUseCase: loginUseCase as jest.Mocked<LoginUseCase>
+    },
+    mocks: {
+      next: nextFnMock
+    }
+  };
+};
