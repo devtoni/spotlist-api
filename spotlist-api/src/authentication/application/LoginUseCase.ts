@@ -1,7 +1,7 @@
 import { AuthenticatedUser } from '../domain/AuthenticatedUser';
 import { UsersRepository } from '../domain/UsersRepository';
 import { InMemoryUsersRepository } from '../infrastructure/repositories/InMemoryUsersRepository';
-import usersDb from '../../../../data/users.json';
+import usersDb from '../infrastructure/data/users.json';
 
 class LoginUseCase {
   constructor(private usersRepository: UsersRepository) {}
