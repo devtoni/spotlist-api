@@ -1,12 +1,15 @@
 {
   "name": "spotlist-api",
   "version": "1.0.0",
+  "engines": {
+    "node": "15.4.0"
+  },
   "description": "",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register 'src/test/**/*.ts'",
     "integration": "cypress run",
-    "prestart": "tsc",
+    "prestart": "node scripts/check-version && tsc",
     "start": "node dist/index.js"
   },
   "author": "",
