@@ -1,3 +1,1 @@
-/*
-    Your solution should go here
-*/
+console.log('hellooooo!!')
