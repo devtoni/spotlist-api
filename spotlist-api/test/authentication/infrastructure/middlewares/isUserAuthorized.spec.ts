@@ -14,19 +14,21 @@ describe('isUserAuthorized', () => {
     };
     const { callMiddleware, mocks, services } = factory(headers);
 
-    services.loginUseCase.execute.mockResolvedValueOnce({
+    const expectedUser = {
       name: 'toni',
       password: '123456',
       id: '1'
-    });
+    };
+    services.loginUseCase.execute.mockResolvedValueOnce(expectedUser);
     await callMiddleware();
 
-    expect(mocks.next).toHaveBeenCalled();
+    expect(mocks.response.locals.userId).toEqual(expectedUser.id);
+    expect(mocks.next).toHaveBeenCalledWith();
   });
 
   test('Should set an unauthorized error when authorization header is not found', async () => {
     const headers = {};
-    const { callMiddleware, mocks, services } = factory(headers);
+    const { callMiddleware, mocks } = factory(headers);
 
     await callMiddleware();
 
@@ -39,7 +41,7 @@ describe('isUserAuthorized', () => {
     const headers = {
       authorization: 'Bearer ..'
     };
-    const { callMiddleware, mocks, services } = factory(headers);
+    const { callMiddleware, mocks } = factory(headers);
 
     await callMiddleware();
 
@@ -66,7 +68,7 @@ const factory = (customHeaders: { authorization?: string }) => {
   const requestMock = {
     headers: customHeaders
   } as unknown as Request;
-  const responseMock = jest.fn() as unknown as Response;
+  const responseMock = { locals: jest.fn() } as unknown as Response;
 
   return {
     callMiddleware: () => isUserAuthorized(requestMock, responseMock, nextFnMock),
@@ -74,6 +76,7 @@ const factory = (customHeaders: { authorization?: string }) => {
       loginUseCase: loginUseCase as jest.Mocked<LoginUseCase>
     },
     mocks: {
+      response: responseMock,
       next: nextFnMock
     }
   };

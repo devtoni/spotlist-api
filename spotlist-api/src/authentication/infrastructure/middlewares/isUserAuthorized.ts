@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import UnauthorizedError from '../../../shared/infrastructure/errors/UnauthorizedError';
 import loginUseCase from '../../application/LoginUseCase';
 
-export default async (request: Request, _response: Response, next: NextFunction): Promise<void> => {
+export default async (request: Request, response: Response, next: NextFunction): Promise<void> => {
   const { authorization } = request.headers;
 
   if (!authorization) {
@@ -20,7 +20,9 @@ export default async (request: Request, _response: Response, next: NextFunction)
   const [username, password] = credentials.split(credentialsSeparator);
 
   try {
-    await loginUseCase.execute(username, password);
+    const authenticatedUser = await loginUseCase.execute(username, password);
+
+    response.locals.userId = authenticatedUser.id;
   } catch (error) {
     if (error.message.includes('User not found')) {
       return next(new UnauthorizedError('User not found'));
