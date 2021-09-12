@@ -1,0 +1,18 @@
+{
+  "env": {
+    "apiUrl": "http://localhost:8000"
+  },
+  "testFiles": [
+    "add.list.spec.ts",
+    "get.lists.spec.ts",
+    "get.list.from.user.spec.ts",
+    "add.songs.spec.ts"
+  ],
+  "reporter": "junit",
+  "reporterOptions": {
+    "mochaFile": "cypress.xml",
+    "toConsole": false
+  },
+  "video": false,
+  "screenshotOnRunFailure": false
+}
