@@ -3,12 +3,13 @@ import { InMemoryUserSongListsRepository } from '../../../../src/users/infrastru
 describe('InMemoryUserSongListsRepository', () => {
   test('Should return the song lists of a given user', async () => {
     const userId = '123456';
+    const listId = '12';
     const repository = new InMemoryUserSongListsRepository();
-    await repository.persist(userId, createFakeSongList('12'));
+    await repository.persist(userId, createFakeSongList(listId));
 
     const response = await repository.find(userId);
 
-    expect(response).toEqual([{ listId: '12', songs: [] }]);
+    expect(response).toEqual([{ listId, songs: [] }]);
   });
 
   test(`Should return null in case there aren't song lists for a given user yet`, async () => {
@@ -22,35 +23,38 @@ describe('InMemoryUserSongListsRepository', () => {
 
   test('Should persist a song list for a non existent user song lists resource', async () => {
     const userId = '123456';
+    const listId = '13';
     const repository = new InMemoryUserSongListsRepository();
 
-    await repository.persist(userId, createFakeSongList('13'));
+    await repository.persist(userId, createFakeSongList(listId));
     const response = await repository.find(userId);
 
-    expect(response).toEqual([{ listId: '13', songs: [] }]);
+    expect(response).toEqual([{ listId, songs: [] }]);
   });
 
   test('Should persist a song list for an existent user song lists resource', async () => {
     const userId = '123456';
+    const listId1 = '12';
+    const listId2 = '13';
     const repository = new InMemoryUserSongListsRepository();
-    await repository.persist(userId, createFakeSongList('12'));
+    await repository.persist(userId, createFakeSongList(listId1));
 
-    await repository.persist(userId, createFakeSongList('13'));
+    await repository.persist(userId, createFakeSongList(listId2));
     const response = await repository.find(userId);
 
     expect(response).toHaveLength(2);
-    expect(response).toEqual(expect.arrayContaining([{ listId: '13', songs: [] }]));
+    expect(response).toEqual(expect.arrayContaining([{ listId: listId2, songs: [] }]));
   });
 
   test('Should return a requested song list of a user', async () => {
     const userId = '123456';
     const listId = '123';
     const repository = new InMemoryUserSongListsRepository();
-    await repository.persist(userId, createFakeSongList('123'));
+    await repository.persist(userId, createFakeSongList(listId));
 
     const response = await repository.findById(userId, listId);
 
-    expect(response).toEqual({ listId: '123', songs: [] });
+    expect(response).toEqual({ listId, songs: [] });
   });
 
   test(`Should return null in case a requested song list is not found in a given user`, async () => {
@@ -68,15 +72,13 @@ describe('InMemoryUserSongListsRepository', () => {
     const listId = '12';
     const song = { title: 'a song', artist: 'an artist' };
     const repository = new InMemoryUserSongListsRepository();
-    await repository.persist(userId, createFakeSongList('12'));
+    await repository.persist(userId, createFakeSongList(listId));
 
     await repository.persistSongByListId(userId, listId, song);
     const response = await repository.find(userId);
 
     expect(response).toHaveLength(1);
-    expect(response).toEqual(
-      expect.arrayContaining([{ listId: '12', songs: [{ artist: 'an artist', title: 'a song' }] }])
-    );
+    expect(response).toEqual(expect.arrayContaining([{ listId: listId, songs: [song] }]));
   });
 });
 

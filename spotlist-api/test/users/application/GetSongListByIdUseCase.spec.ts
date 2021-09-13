@@ -3,26 +3,24 @@ import { InMemoryUserSongListsRepository } from '../../../src/users/infrastructu
 
 describe('GetSongListByIdUseCase', () => {
   test('Should return the song list of a given user', async () => {
-    const userId = '123456';
-    const listId = '123';
+    const request = { userId: '123456', listId: '123' };
     const repository = new InMemoryUserSongListsRepository();
     const getSongListByIdUseCase = new GetSongListByIdUseCase(repository);
-    await repository.persist(userId, createFakeSongList('123'));
+    await repository.persist(request.userId, createFakeSongList(request.listId));
 
-    const response = await getSongListByIdUseCase.execute(userId, listId);
+    const response = await getSongListByIdUseCase.execute(request.userId, request.listId);
 
     expect(response).toEqual({ listId: '123', songs: [] });
   });
 
-  test(`Should return null in case a requested song list does not exist for a given user`, async () => {
-    const userId = '123456';
-    const listId = '123';
+  test(`Should throw error in case a requested song list does not exist for a given user`, async () => {
+    const request = { userId: '123456', listId: '123' };
     const repository = new InMemoryUserSongListsRepository();
     const getSongListByIdUseCase = new GetSongListByIdUseCase(repository);
 
-    const response = await getSongListByIdUseCase.execute(userId, listId);
-
-    expect(response).toEqual(null);
+    await expect(
+      getSongListByIdUseCase.execute(request.userId, request.listId)
+    ).rejects.toThrowError(new Error('Song list not found'));
   });
 });
 

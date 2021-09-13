@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import BadRequestError from '../../../../src/shared/infrastructure/errors/BadRequest';
+import UnauthorizedError from '../../../../src/shared/infrastructure/errors/UnauthorizedError';
 import createSongList from '../../../../src/users/infrastructure/controllers/createSongList';
 
 describe('createSongList', () => {
@@ -12,12 +13,10 @@ describe('createSongList', () => {
 
     await controller();
 
-    expect(mocks.response.json).toHaveBeenCalledWith({
-      data: { listId: expect.any(String), songs: [] }
-    });
+    expect(mocks.response.json).toHaveBeenCalledWith({ listId: expect.any(String), songs: [] });
   });
 
-  test('Should validate request params userId with the current userId', async () => {
+  test('Should call to the next route match with an unauthorized error when a retrieved userId from request params is different that the current authorized user', async () => {
     const { controller, mocks } = factory({
       requestParams: '',
       requestBody: { list: { songs: [] } },
@@ -26,10 +25,12 @@ describe('createSongList', () => {
 
     await controller();
 
-    expect(mocks.next).toHaveBeenCalledWith(new BadRequestError('Invalid parameters'));
+    expect(mocks.next).toHaveBeenCalledWith(
+      new UnauthorizedError('User is not the one authenticated')
+    );
   });
 
-  test('Should validate request body when list is not provided', async () => {
+  test('Should call to the next route match with a bad request error when request body comes without list attribute', async () => {
     const { controller, mocks } = factory({
       requestParams: '123455',
       requestBody: {},
@@ -41,7 +42,7 @@ describe('createSongList', () => {
     expect(mocks.next).toHaveBeenCalledWith(new BadRequestError('Invalid parameters'));
   });
 
-  test('Should validate request body when list.songs are provided', async () => {
+  test('Should call to the next route match with a bad request error when request body list.songs are not correct', async () => {
     const { controller, mocks } = factory({
       requestParams: '123455',
       requestBody: { list: { songs: [{ badProp: '' }] } },

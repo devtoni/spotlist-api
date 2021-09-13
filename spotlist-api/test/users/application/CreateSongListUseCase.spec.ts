@@ -6,13 +6,13 @@ describe('CreateSongListUseCase', () => {
     const userId = '123456';
     const repository = new InMemoryUserSongListsRepository();
     const identityManager = { next: () => '1' };
-    const fakeSongs = [
+    const requestSongs = [
       { title: 'a song', artist: 'an artist ' },
       { title: 'another song', artist: 'another artist ' }
     ];
     const createSongListUseCase = new CreateSongListUseCase(repository, identityManager);
 
-    const response = await createSongListUseCase.execute(userId, fakeSongs);
+    const response = await createSongListUseCase.execute(userId, requestSongs);
 
     expect(response).toEqual({
       listId: '1',

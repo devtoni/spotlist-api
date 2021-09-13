@@ -2,7 +2,10 @@ import { Request, Response } from 'express';
 import BadRequestError from '../../../../src/shared/infrastructure/errors/BadRequest';
 import addSongToASongList from '../../../../src/users/infrastructure/controllers/addSongToASongList';
 import addSongToASongListUseCase from '../../../../src/users/application/AddSongToASongListUseCase';
-import inMemoryUserSongListsRepository, { InMemoryUserSongListsRepository } from '../../../../src/users/infrastructure/repositories/InMemoryUserSongListsRepository'
+import inMemoryUserSongListsRepository, {
+  InMemoryUserSongListsRepository
+} from '../../../../src/users/infrastructure/repositories/InMemoryUserSongListsRepository';
+import UnauthorizedError from '../../../../src/shared/infrastructure/errors/UnauthorizedError';
 
 jest.mock('../../../../src/users/infrastructure/repositories/InMemoryUserSongListsRepository.ts');
 
@@ -13,8 +16,10 @@ describe('addSongToASongList', () => {
       requestBody: { song: { artist: 'an artist', title: 'a title' } },
       userId: '123456'
     });
-    (inMemoryUserSongListsRepository as jest.Mocked<InMemoryUserSongListsRepository>).findById.mockResolvedValue({listId: '1234', songs: []})
-    
+    (
+      inMemoryUserSongListsRepository as jest.Mocked<InMemoryUserSongListsRepository>
+    ).findById.mockResolvedValue({ listId: '1234', songs: [] });
+
     await addSongToASongListUseCase.execute('123456', '234', {
       artist: 'an artist',
       title: 'a title'
@@ -22,10 +27,10 @@ describe('addSongToASongList', () => {
 
     await controller();
 
-    expect(mocks.response.json).toHaveBeenCalledWith({ data: { artist: 'an artist', title: 'a title' } });
+    expect(mocks.response.json).toHaveBeenCalledWith({ artist: 'an artist', title: 'a title' });
   });
 
-  test('Should call to the next route match when a retrieved userId from request params is different that the current authorized user', async () => {
+  test('Should call to the next route match with an unauthorized error  when a retrieved userId from request params is different that the current authorized user', async () => {
     const { controller, mocks } = factory({
       requestParams: { userId: '12345', listId: '1234' },
       requestBody: { list: { songs: [] } },
@@ -34,10 +39,12 @@ describe('addSongToASongList', () => {
 
     await controller();
 
-    expect(mocks.next).toHaveBeenCalledWith(new BadRequestError('Invalid parameters'));
+    expect(mocks.next).toHaveBeenCalledWith(
+      new UnauthorizedError('User is not the one authenticated')
+    );
   });
 
-  test('Should call to the next route match when request body comes without a song attribute', async () => {
+  test('Should call to the next route match with a bad request error  when request body comes without a song attribute', async () => {
     const { controller, mocks } = factory({
       requestParams: { userId: '123456', listId: '1234' },
       requestBody: {},
@@ -49,7 +56,7 @@ describe('addSongToASongList', () => {
     expect(mocks.next).toHaveBeenCalledWith(new BadRequestError('Invalid parameters'));
   });
 
-  test('Should call to the next route match when request body comes with a malformed song', async () => {
+  test('Should call to the next route match with a bad request error when request body comes with a malformed song', async () => {
     const { controller, mocks } = factory({
       requestParams: { userId: '123456', listId: '1234' },
       requestBody: { artist: 'some artist' },
@@ -61,7 +68,7 @@ describe('addSongToASongList', () => {
     expect(mocks.next).toHaveBeenCalledWith(new BadRequestError('Invalid parameters'));
   });
 
-  test('Should call to the next route match when the given listId from request params is not found for the current user', async () => {
+  test('Should call to the next route match with a bad request error  when the given listId from request params is not found for the current user', async () => {
     const { controller, mocks } = factory({
       requestParams: { userId: '123456', listId: '1234' },
       requestBody: { artist: 'some artist' },

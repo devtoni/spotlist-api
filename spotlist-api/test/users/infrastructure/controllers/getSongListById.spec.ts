@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import BadRequestError from '../../../../src/shared/infrastructure/errors/BadRequest';
+import UnauthorizedError from '../../../../src/shared/infrastructure/errors/UnauthorizedError';
 import getSongListByIdUseCase, {
   GetSongListByIdUseCase
 } from '../../../../src/users/application/GetSongListByIdUseCase';
@@ -9,27 +10,42 @@ jest.mock('../../../../src/users/application/GetSongListByIdUseCase.ts');
 
 describe('getSongListById', () => {
   test('Should return a requested song list of a given user', async () => {
-    const userId = '123456';
-    const listId = '1234';
-    const { mocks, controller } = factory({ requestParams: { userId, listId }, userId });
+    const request = { userId: '123456', listId: '1234' };
+    const { mocks, controller } = factory({ requestParams: request, userId: request.userId });
 
     (getSongListByIdUseCase as jest.Mocked<GetSongListByIdUseCase>).execute.mockResolvedValue({
-      listId: '1234',
+      listId: request.listId,
       songs: []
     });
     await controller();
 
-    expect(mocks.response.json).toHaveBeenCalledWith({ data: { listId: '1234', songs: [] } });
+    expect(mocks.response.json).toHaveBeenCalledWith({ listId: request.listId, songs: [] });
   });
 
-  test('Should validate request params userId with the current userId', async () => {
-    const userId = '123456';
-    const listId = '1234';
+  test('Should call to the next route match with an unauthorized error when a retrieved userId from request params is different that the current authorized user', async () => {
+    const request = { userId: '123456', listId: '1234' };
     const { mocks, controller } = factory({
-      requestParams: { userId, listId },
+      requestParams: request,
       userId: 'anotherUserId'
     });
 
+    await controller();
+
+    expect(mocks.next).toHaveBeenCalledWith(
+      new UnauthorizedError('User is not the one authenticated')
+    );
+  });
+
+  test('Should call to the next route match with an bad request error when a the request listId of an userId is not found', async () => {
+    const request = { userId: '123456', listId: '1234' };
+    const { mocks, controller } = factory({
+      requestParams: request,
+      userId: request.userId
+    });
+
+    (getSongListByIdUseCase as jest.Mocked<GetSongListByIdUseCase>).execute.mockRejectedValue(
+      new Error('Song list not found')
+    );
     await controller();
 
     expect(mocks.next).toHaveBeenCalledWith(new BadRequestError('Invalid parameters'));

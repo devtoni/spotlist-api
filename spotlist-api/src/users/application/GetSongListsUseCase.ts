@@ -8,6 +8,10 @@ class GetSongListsUseCase {
   async execute(userId: string): Promise<SongList[] | null> {
     const songLists = await this.userSongListsRepository.find(userId);
 
+    if (!songLists) {
+      throw new Error('Song lists not found');
+    }
+
     return songLists;
   }
 }
