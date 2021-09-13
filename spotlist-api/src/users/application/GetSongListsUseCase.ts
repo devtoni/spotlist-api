@@ -5,7 +5,7 @@ import inMemoryUsersSongListsRepository from '../infrastructure/repositories/InM
 class GetSongListsUseCase {
   constructor(private userSongListsRepository: UserSongListsRepository) {}
 
-  async execute(userId: string): Promise<SongList[] | null> {
+  async execute(userId: string): Promise<SongList[]> {
     const songLists = await this.userSongListsRepository.find(userId);
 
     if (!songLists) {
