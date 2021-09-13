@@ -4,4 +4,6 @@ dist
 /spotlist-api/cypress/*
 !/spotlist-api/cypress/integration
 !/spotlist-api/cypress/tsconfig.json
+!/spotlist-api/cypress/cypress.json
+!/spotlist-api/cypress/fixtures
 /**/cypress.xml

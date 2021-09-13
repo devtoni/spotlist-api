@@ -10,7 +10,7 @@
     "pretest": "node scripts/check-version",
     "test": "jest",
     "test:watch": "npm run test -- --watch",
-    "integration": "cypress run",
+    "integration": "start-server-and-test 'npm run build && npm run serve' http://localhost:3000/_healthz 'cypress run --config-file cypress/cypress.json'",
     "prestart": "node scripts/check-version",
     "start": "nodemon",
     "build": "tsc -p tsconfig.prod.json",
@@ -30,6 +30,7 @@
     "cypress": "^7.1.0",
     "jest": "^27.1.1",
     "nodemon": "^2.0.12",
+    "start-server-and-test": "^1.14.0",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "typescript": "^4.2.4"
