@@ -9,6 +9,10 @@ app.use(express.json());
 
 app.use('/users', isUserAuthorized, userRoutes);
 
+app.use('/_healthz', (_request: Request, response: Response) => {
+  response.json({ message: 'ok' });
+});
+
 app.use(errorHandler);
 
 export default app;
