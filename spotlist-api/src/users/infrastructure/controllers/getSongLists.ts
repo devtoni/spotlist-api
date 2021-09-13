@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import BadRequestError from '../../../shared/infrastructure/errors/BadRequest';
-import getUserSongLists from '../../application/GetSongListsUseCase';
+import getSongListsUseCase from '../../application/GetSongListsUseCase';
 
 export default async (request: Request, response: Response, next: NextFunction) => {
   const { userId } = request.params;
@@ -9,7 +9,7 @@ export default async (request: Request, response: Response, next: NextFunction) 
     return next(new BadRequestError('Invalid parameters'));
   }
 
-  const songLists = await getUserSongLists.execute(userId);
+  const songLists = await getSongListsUseCase.execute(userId);
 
   return response.json({ data: songLists });
 };
