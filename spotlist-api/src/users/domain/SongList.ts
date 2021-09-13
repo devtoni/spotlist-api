@@ -2,7 +2,7 @@ import { Song } from './Song';
 
 type SongList = {
   listId: string;
-  songs?: Song[];
+  songs: Song[];
 };
 
 export { SongList };

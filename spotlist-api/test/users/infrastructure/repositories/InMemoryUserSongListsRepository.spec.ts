@@ -62,6 +62,22 @@ describe('InMemoryUserSongListsRepository', () => {
 
     expect(response).toEqual(null);
   });
+
+  test('Should persist a song for a given listId of an user', async () => {
+    const userId = '123456';
+    const listId = '12';
+    const song = { title: 'a song', artist: 'an artist' };
+    const repository = new InMemoryUserSongListsRepository();
+    await repository.persist(userId, createFakeSongList('12'));
+
+    await repository.persistSongByListId(userId, listId, song);
+    const response = await repository.find(userId);
+
+    expect(response).toHaveLength(1);
+    expect(response).toEqual(
+      expect.arrayContaining([{ listId: '12', songs: [{ artist: 'an artist', title: 'a song' }] }])
+    );
+  });
 });
 
 const createFakeSongList = (id: string) => {

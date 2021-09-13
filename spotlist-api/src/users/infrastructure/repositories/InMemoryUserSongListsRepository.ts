@@ -1,3 +1,4 @@
+import { Song } from '../../domain/Song';
 import { SongList } from '../../domain/SongList';
 import { UserSongListsRepository } from '../../domain/UserSongListsRepository';
 
@@ -30,6 +31,14 @@ class InMemoryUserSongListsRepository implements UserSongListsRepository {
     } else {
       userSongLists.push(songList);
     }
+  }
+
+  async persistSongByListId(userId: string, listId: string, song: Song): Promise<void> {
+    const userSongLists = this.userSongListsDb[userId];
+
+    const songList = userSongLists.find((songList) => songList.listId === listId) as SongList;
+
+    songList.songs.push(song);
   }
 }
 
