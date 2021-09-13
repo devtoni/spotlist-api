@@ -41,6 +41,27 @@ describe('InMemoryUserSongListsRepository', () => {
     expect(response).toHaveLength(2);
     expect(response).toEqual(expect.arrayContaining([{ listId: '13', songs: [] }]));
   });
+
+  test('Should return a requested song list of a user', async () => {
+    const userId = '123456';
+    const listId = '123';
+    const repository = new InMemoryUserSongListsRepository();
+    await repository.persist(userId, createFakeSongList('123'));
+
+    const response = await repository.findById(userId, listId);
+
+    expect(response).toEqual({ listId: '123', songs: [] });
+  });
+
+  test(`Should return null in case a requested song list is not found in a given user`, async () => {
+    const userId = '123456';
+    const listId = '123';
+    const repository = new InMemoryUserSongListsRepository();
+
+    const response = await repository.findById(userId, listId);
+
+    expect(response).toEqual(null);
+  });
 });
 
 const createFakeSongList = (id: string) => {

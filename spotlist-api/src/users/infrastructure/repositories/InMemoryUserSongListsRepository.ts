@@ -12,6 +12,16 @@ class InMemoryUserSongListsRepository implements UserSongListsRepository {
     return userSongLists || null;
   }
 
+  async findById(userId: string, songListId: string): Promise<SongList | null> {
+    const userSongLists = this.userSongListsDb[userId];
+
+    if (!userSongLists) {
+      return null;
+    }
+
+    return userSongLists.find((userSongList) => userSongList.listId === songListId) || null;
+  }
+
   async persist(userId: string, songList: SongList): Promise<void> {
     const userSongLists = this.userSongListsDb[userId];
 
